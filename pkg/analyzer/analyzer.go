@@ -1,17 +1,89 @@
 package analyzer
 
 import (
+	"go/ast"
+	"go/types"
+
 	"golang.org/x/tools/go/analysis"
+	"golang.org/x/tools/go/analysis/passes/inspect"
+	"golang.org/x/tools/go/ast/inspector"
 )
 
 func NewAnalyzer() *analysis.Analyzer {
 	return &analysis.Analyzer{
 		Name: "loglinter",
-		Doc:  "Checks log messages for specific formatting rules (case, language, symbols, secrets)",
+		Doc:  "Checks log messages for specific formatting rules",
 		Run:  run,
+		Requires:[]*analysis.Analyzer{inspect.Analyzer},
 	}
 }
 
-func run(pass *analysis.Pass) (interface{}, error) {	
+var targetLoggers = map[string]map[string]int{
+	"log/slog": {
+		"Info":  0,
+		"Error": 0,
+		"Warn":  0,
+		"Debug": 0,
+	},
+	"go.uber.org/zap": {
+		"Info":  0,
+		"Error": 0,
+		"Warn":  0,
+		"Debug": 0,
+		"Fatal": 0,
+	},
+}
+
+func run(pass *analysis.Pass) (any, error) {
+	insp := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+
+	nodeFilter :=[]ast.Node{
+		(*ast.CallExpr)(nil),
+	}
+
+	insp.Preorder(nodeFilter, func(node ast.Node) {
+		call := node.(*ast.CallExpr)
+
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+		if !ok {
+			return
+		}
+
+		obj := pass.TypesInfo.Uses[sel.Sel]
+		if obj == nil {
+			return
+		}
+
+		funcObj, ok := obj.(*types.Func)
+		if !ok {
+			return
+		}
+
+		pkg := funcObj.Pkg()
+		if pkg == nil {
+			return
+		}
+		pkgPath := pkg.Path()
+
+		methods, isTargetPkg := targetLoggers[pkgPath]
+		if !isTargetPkg {
+			return
+		}
+
+		funcName := funcObj.Name()
+		argIndex, isTargetMethod := methods[funcName]
+		if !isTargetMethod {
+			return
+		}
+
+		if len(call.Args) <= argIndex {
+			return
+		}
+
+		msgArg := call.Args[argIndex]
+
+		pass.Reportf(msgArg.Pos(), "found log message in %s.%s", pkgPath, funcName)
+	})
+
 	return nil, nil
 }
