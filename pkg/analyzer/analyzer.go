@@ -7,6 +7,8 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
+	
+	"github.com/mmmIlia/loglinter/pkg/rules"
 )
 
 func NewAnalyzer() *analysis.Analyzer {
@@ -82,7 +84,13 @@ func run(pass *analysis.Pass) (any, error) {
 
 		msgArg := call.Args[argIndex]
 
-		pass.Reportf(msgArg.Pos(), "found log message in %s.%s", pkgPath, funcName)
+		activeRules :=[]rules.Rule{
+			rules.NewLowercaseRule(),
+		}
+
+		for _, rule := range activeRules {
+			rule.Check(pass, msgArg)
+		}
 	})
 
 	return nil, nil

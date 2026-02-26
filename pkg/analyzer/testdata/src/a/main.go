@@ -5,19 +5,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type MyCustomLogger struct{}
-
-func (l *MyCustomLogger) Info(msg string) {}
-
 func main() {
-	slog.Info("this is a test") // want "found log message in log/slog.Info"
-
-	logger := slog.Default()
-	logger.Error("another test") // want "found log message in log/slog.Error"
-
+	slog.Info("starting server")
+	slog.Error("failed to connect")
+	
 	zapLogger := zap.NewExample()
-	zapLogger.Warn("zap test") // want "found log message in go.uber.org/zap.Warn"
+	zapLogger.Debug("all good")
+	
+	slog.Info("123 servers started")
+	slog.Info("[HTTP] server started")
 
-	fakeLogger := &MyCustomLogger{}
-	fakeLogger.Info("Should be ignored")
+	slog.Info("Starting server on port 8080") // want "Log message should start with a lowercase letter"
+	slog.Error("Failed to connect to database") // want "Log message should start with a lowercase letter"
+	
+	zapLogger.Warn("Warning: something went wrong") // want "Log message should start with a lowercase letter"
 }
