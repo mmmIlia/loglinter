@@ -86,6 +86,7 @@ func run(pass *analysis.Pass) (any, error) {
 
 		activeRules :=[]rules.Rule{
 			rules.NewLowercaseRule(),
+			rules.NewEnglishRule(),
 		}
 
 		for _, rule := range activeRules {

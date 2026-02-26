@@ -19,4 +19,9 @@ func main() {
 	slog.Error("Failed to connect to database") // want "log message should start with a lowercase letter"
 	
 	zapLogger.Warn("Warning: something went wrong") // want "log message should start with a lowercase letter"
+
+	slog.Info("запуск сервера") // want "log message must be in English"
+	slog.Error("ошибка подключения к базе данных") // want "log message must be in English"
+	
+	slog.Info("Падение") // want "log message should start with a lowercase letter" "log message must be in English"
 }
