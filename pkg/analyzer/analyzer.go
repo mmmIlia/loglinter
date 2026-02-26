@@ -43,6 +43,16 @@ func run(pass *analysis.Pass) (any, error) {
 		(*ast.CallExpr)(nil),
 	}
 
+	styleRules := []rules.Rule{
+		rules.NewLowercaseRule(),
+		rules.NewEnglishRule(),
+		rules.NewSpecialCharsRule(),
+	}
+
+	dataRules := []rules.Rule{
+		rules.NewSensitiveDataRule(),
+	}
+
 	insp.Preorder(nodeFilter, func(node ast.Node) {
 		call := node.(*ast.CallExpr)
 
@@ -65,33 +75,30 @@ func run(pass *analysis.Pass) (any, error) {
 		if pkg == nil {
 			return
 		}
-		pkgPath := pkg.Path()
-
-		methods, isTargetPkg := targetLoggers[pkgPath]
+		
+		methods, isTargetPkg := targetLoggers[pkg.Path()]
 		if !isTargetPkg {
 			return
 		}
 
-		funcName := funcObj.Name()
-		argIndex, isTargetMethod := methods[funcName]
+		msgIndex, isTargetMethod := methods[funcObj.Name()]
 		if !isTargetMethod {
 			return
 		}
 
-		if len(call.Args) <= argIndex {
+		if len(call.Args) <= msgIndex {
 			return
 		}
 
-		msgArg := call.Args[argIndex]
-
-		activeRules :=[]rules.Rule{
-			rules.NewLowercaseRule(),
-			rules.NewEnglishRule(),
-			rules.NewSpecialCharsRule(),
+		msgArg := call.Args[msgIndex]
+		for _, rule := range styleRules {
+			rule.Check(pass, msgArg)
 		}
 
-		for _, rule := range activeRules {
-			rule.Check(pass, msgArg)
+		for _, arg := range call.Args {
+			for _, rule := range dataRules {
+				rule.Check(pass, arg)
+			}
 		}
 	})
 

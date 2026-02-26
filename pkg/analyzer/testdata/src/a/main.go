@@ -33,4 +33,17 @@ func main() {
 	slog.Warn("warning: something went wrong...") // want "log message should not end with punctuation"
 	
 	slog.Info("user: created") 
+
+
+	slog.Warn("warning: something went wrong...") // want "log message should not end with punctuation"
+
+	
+	userPassword := "secret123"
+	
+	slog.Info("user password saved successfully") 
+
+	slog.Info("user password: ") // want "log message should not contain potential sensitive data"
+	slog.Info("api_key=") // want "log message should not contain potential sensitive data"
+	slog.Info("login attempt: " + userPassword) // want "log message should not use variable with potential sensitive data"
+	slog.Debug("data", "val", userPassword) // want "log message should not use variable with potential sensitive data"
 }
