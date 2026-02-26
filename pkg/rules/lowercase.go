@@ -37,5 +37,27 @@ func (r *LowercaseRule) Check(pass *analysis.Pass, msgArg ast.Expr) {
 		return
 	}
 
-	pass.Reportf(lit.Pos(), "log message should start with a lowercase letter")
+	runes := []rune(val)
+	runes[0] = unicode.ToLower(runes[0])
+	newStr := string(runes)
+
+	newLit := strconv.Quote(newStr)
+
+	pass.Report(analysis.Diagnostic{
+		Pos:     lit.Pos(),
+		End:     lit.End(),
+		Message: "log message should start with a lowercase letter",
+		SuggestedFixes: []analysis.SuggestedFix{
+			{
+				Message: "Convert to lowercase",
+				TextEdits: []analysis.TextEdit{
+					{
+						Pos:     lit.Pos(),
+						End:     lit.End(),
+						NewText: []byte(newLit),
+					},
+				},
+			},
+		},
+	})
 }
