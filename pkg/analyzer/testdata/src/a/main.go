@@ -15,8 +15,8 @@ func main() {
 	slog.Info("123 servers started")
 	slog.Info("[HTTP] server started")
 
-	slog.Info("Starting server on port 8080") // want "Log message should start with a lowercase letter"
-	slog.Error("Failed to connect to database") // want "Log message should start with a lowercase letter"
+	slog.Info("Starting server on port 8080") // want "log message should start with a lowercase letter"
+	slog.Error("Failed to connect to database") // want "log message should start with a lowercase letter"
 	
-	zapLogger.Warn("Warning: something went wrong") // want "Log message should start with a lowercase letter"
+	zapLogger.Warn("Warning: something went wrong") // want "log message should start with a lowercase letter"
 }

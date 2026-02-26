@@ -37,5 +37,5 @@ func (r *LowercaseRule) Check(pass *analysis.Pass, msgArg ast.Expr) {
 		return
 	}
 
-	pass.Reportf(lit.Pos(), "Log message should start with a lowercase letter")
+	pass.Reportf(lit.Pos(), "log message should start with a lowercase letter")
 }
