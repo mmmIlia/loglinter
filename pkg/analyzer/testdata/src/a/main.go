@@ -46,4 +46,7 @@ func main() {
 	slog.Info("api_key=") // want "log message should not contain potential sensitive data"
 	slog.Info("login attempt: " + userPassword) // want "log message should not use variable with potential sensitive data"
 	slog.Debug("data", "val", userPassword) // want "log message should not use variable with potential sensitive data"
+	zapLogger.Info("user created", zap.String("password:", "12345")) // want "log message should not contain potential sensitive data"
+	
+	zapLogger.Info("user action", zap.String("UserID", "123"))
 }
