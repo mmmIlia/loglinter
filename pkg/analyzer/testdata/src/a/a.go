@@ -31,11 +31,9 @@ func main() {
 	slog.Info("server started 🚀") // want "log message should not contain emojis"
 	slog.Error("connection failed!!!") // want "log message should not contain exclamation or question marks"
 	slog.Warn("warning: something went wrong...") // want "log message should not end with punctuation"
+	slog.Info("Server запустился! 🚀...") // want "log message should not contain emojis" "log message should not end with punctuation" "log message should start with a lowercase letter" "log message must be in English" "log message should not contain exclamation or question marks"
 	
 	slog.Info("user: created") 
-
-
-	slog.Warn("warning: something went wrong...") // want "log message should not end with punctuation"
 
 	
 	userPassword := "secret123"

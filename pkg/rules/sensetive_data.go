@@ -5,24 +5,40 @@ import (
 	"go/token"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"golang.org/x/tools/go/analysis"
 )
 
 const (
-	variablePattern string = `(?i)(password|secret|token|api_?key|access_?key)`
-	stringPattern string = `(?i)(password|secret|token|api_?key|access_?key)[_.\-\s]*[:=]`
+	defaultVariablePattern string = `(?i)(password|secret|token|api_?key|access_?key)`
+	defaultStringPattern   string = `(?i)(password|secret|token|api_?key|access_?key)[_.\-\s]*[:=]`
 )
 
 type SensitiveDataRule struct {
 	variablePattern *regexp.Regexp
-	stringPattern *regexp.Regexp
+	stringPattern   *regexp.Regexp
 }
 
-func NewSensitiveDataRule() *SensitiveDataRule {
+func NewSensitiveDataRule(customPatterns string) *SensitiveDataRule {
+	varPattern := defaultVariablePattern
+	strPattern := defaultStringPattern
+
+	if customPatterns != "" {
+		patterns := strings.Split(customPatterns, ",")
+		for i, p := range patterns {
+			patterns[i] = strings.TrimSpace(p)
+		}
+
+		customRegex := `(?i)(` + strings.Join(patterns, "|") + `)`
+		
+		varPattern = customRegex
+		strPattern = customRegex + `[_.\-\s]*[:=]`
+	}
+
 	return &SensitiveDataRule{
-		variablePattern: regexp.MustCompile(variablePattern),
-		stringPattern: regexp.MustCompile(stringPattern),
+		variablePattern: regexp.MustCompile(varPattern),
+		stringPattern:   regexp.MustCompile(strPattern),
 	}
 }
 

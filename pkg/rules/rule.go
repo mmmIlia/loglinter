@@ -5,6 +5,10 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-type Rule interface {
-	Check(pass *analysis.Pass, msgArg ast.Expr)
+type TextRule interface {
+	Apply(text string) (newText string, violations []string)
+}
+
+type NodeRule interface {
+	Check(pass *analysis.Pass, expr ast.Expr)
 }
