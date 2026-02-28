@@ -1,6 +1,6 @@
 module github.com/mmmIlia/loglinter
 
-go 1.25.2
+go 1.24.0
 
 require golang.org/x/tools v0.42.0
 
