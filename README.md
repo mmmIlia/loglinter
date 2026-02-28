@@ -1,6 +1,6 @@
 # loglinter
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/mmmIlia/loglinter)](https://goreportcard.com/report/github.com/mmmIlia/loglinter)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mmmIlia/loglinter?)](https://goreportcard.com/report/github.com/mmmIlia/loglinter)
 [![Build Status](https://github.com/mmmIlia/loglinter/workflows/build/badge.svg)](https://github.com/mmmIlia/loglinter/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

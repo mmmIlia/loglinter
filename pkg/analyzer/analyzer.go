@@ -131,52 +131,56 @@ func processLogCall(pass *analysis.Pass, node ast.Node, textRules []rules.TextRu
 		return
 	}
 
-	msgArg := call.Args[msgIndex]
-
-	if lit, ok := msgArg.(*ast.BasicLit); ok && lit.Kind == token.STRING {
-		originalVal, err := strconv.Unquote(lit.Value)
-		if err == nil {
-			currentText := originalVal
-			var allViolations []string
-
-			for _, rule := range textRules {
-				newText, violations := rule.Apply(currentText)
-				if len(violations) > 0 {
-					allViolations = append(allViolations, violations...)
-				}
-				currentText = newText
-			}
-
-			if len(allViolations) > 0 {
-				var fixes []analysis.SuggestedFix
-
-				if currentText != originalVal {
-					newLit := strconv.Quote(currentText)
-					fixes = []analysis.SuggestedFix{{
-						Message: "Apply all formatting fixes",
-						TextEdits: []analysis.TextEdit{{
-							Pos:     lit.Pos(),
-							End:     lit.End(),
-							NewText: []byte(newLit),
-						}},
-					}}
-				}
-
-				for _, violation := range allViolations {
-					pass.Report(analysis.Diagnostic{
-						Pos:            lit.Pos(),
-						End:            lit.End(),
-						Message:        violation,
-						SuggestedFixes: fixes,
-					})
-				}
-			}
-		}
-	}
-
 	for _, arg := range call.Args {
 		for _, rule := range dataRules {
 			rule.Check(pass, arg)
 		}
+	}
+
+	msgArg := call.Args[msgIndex]
+
+	lit, ok := msgArg.(*ast.BasicLit)
+	if !ok || lit.Kind != token.STRING {
+		return
+	}
+
+	originalVal, err := strconv.Unquote(lit.Value)
+	if err != nil {
+		return
+	}
+
+	currentText := originalVal
+	var allViolations []string
+
+	for _, rule := range textRules {
+		newText, violations := rule.Apply(currentText)
+		allViolations = append(allViolations, violations...)
+		currentText = newText
+	}
+
+	if len(allViolations) == 0 {
+		return
+	}
+
+	var fixes []analysis.SuggestedFix
+	if currentText != originalVal {
+		newLit := strconv.Quote(currentText)
+		fixes = []analysis.SuggestedFix{{
+			Message: "Apply all formatting fixes",
+			TextEdits: []analysis.TextEdit{{
+				Pos:     lit.Pos(),
+				End:     lit.End(),
+				NewText: []byte(newLit),
+			}},
+		}}
+	}
+
+	for _, violation := range allViolations {
+		pass.Report(analysis.Diagnostic{
+			Pos:            lit.Pos(),
+			End:            lit.End(),
+			Message:        violation,
+			SuggestedFixes: fixes,
+		})
 	}
 }
