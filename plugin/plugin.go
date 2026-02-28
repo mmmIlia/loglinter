@@ -24,7 +24,7 @@ func New(conf any) ([]*analysis.Analyzer, error) {
 		if val, ok := settings["disable-sensitive"].(bool); ok && val {
 			a.Flags.Set("disable-sensitive", "true")
 		}
-		
+
 		if val, ok := settings["sensitive-patterns"].(string); ok {
 			a.Flags.Set("sensitive-patterns", val)
 		}

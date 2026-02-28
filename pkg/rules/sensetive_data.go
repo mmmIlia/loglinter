@@ -31,7 +31,7 @@ func NewSensitiveDataRule(customPatterns string) *SensitiveDataRule {
 		}
 
 		customRegex := `(?i)(` + strings.Join(patterns, "|") + `)`
-		
+
 		varPattern = customRegex
 		strPattern = customRegex + `[_.\-\s]*[:=]`
 	}
@@ -49,7 +49,7 @@ func (r *SensitiveDataRule) Check(pass *analysis.Pass, msgArg ast.Expr) {
 			if err != nil {
 				return true
 			}
-			
+
 			if r.stringPattern.MatchString(val) {
 				pass.Reportf(lit.Pos(), "log message should not contain potential sensitive data")
 				return false

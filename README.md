@@ -6,13 +6,15 @@
 
 A smart Go linter that enforces logging best practices. Designed to work as a plugin for [golangci-lint](https://golangci-lint.run/).
 
-It checks your `slog` and `zap` calls for:
-- 🔡 **Style:** Ensures messages start with lowercase.
-- 🇬🇧 **Language:** Enforces English language.
-- 🧹 **Cleanliness:** Forbids emojis, noisy punctuation (`!`, `?`), and trailing dots.
-- 🔒 **Security:** Detects potential sensitive data leaks (passwords, tokens, keys).
+It analyzes your `slog` and `zap` calls to ensure your logs are consistent, clean, and secure.
 
-✨ **Bonus:** Auto-fix support for style issues!
+## Features
+
+- 🔡 **Style:** Ensures messages start with lowercase.
+- 🇬🇧 **Language:** Enforces English language for consistency.
+- 🧹 **Cleanliness:** Forbids emojis, noisy punctuation (`!`, `?`), and trailing dots.
+- 🔒 **Security:** Detects potential sensitive data leaks (passwords, tokens, keys) in both messages and structured fields.
+- ✨ **Auto-Fix:** Provides one-click fixes for all style issues in your IDE.
 
 ## Installation
 
@@ -37,13 +39,10 @@ linters-settings:
       path: .custom-gcl.yml
       description: "Enforce logging standards"
       original-url: github.com/mmmIlia/loglinter
+      # --- Advanced Configuration Section ---
       settings:
-        # Optional configuration
-        disable-lowercase: false
-        disable-english: false
-        disable-special-chars: false
-        disable-sensitive: false
-        sensitive-patterns: "ssn,credit_card" # Comma-separated custom patterns
+        disable-english: true # Example: disable a specific rule
+        sensitive-patterns: "ssn,credit_card" # Example: add custom sensitive patterns
 
 linters:
   enable:
@@ -58,11 +57,11 @@ golangci-lint custom run
 
 ### Standalone Binary
 
-You can also build and run it directly:
+You can also build and run it directly to use its configuration flags:
 
 ```bash
 go install github.com/mmmIlia/loglinter/cmd/loglinter@latest
-loglinter ./...
+loglinter -disable-english -sensitive-patterns="ssn,credit_card" ./...
 ```
 
 ## Rules & Examples
@@ -91,6 +90,22 @@ Prevents logging of secrets like passwords, tokens, and keys.
 ❌ `slog.Info("password: " + password)`  
 ❌ `slog.Info("token=" + token)`  
 ✅ `slog.Info("user authenticated")`
+
+## How It Works (Architecture)
+
+This linter uses a "Pipeline" pattern for style checks. A log message passes through a series of rules (lowercase -> english -> special chars), each of which cleans up the string. This allows the linter to fix multiple issues in a single pass, providing a superior developer experience.
+
+Security checks (`sensitive-data`) are performed separately on all arguments of a log call, inspecting both string literals and variable names for potential leaks.
+
+## Contributing
+
+Want to add a new rule?
+1.  **TextRule (for style):** Implement the `rules.TextRule` interface. It's a pure function that takes a string and returns a fixed string and a list of violations.
+2.  **NodeRule (for security/logic):** Implement the `rules.NodeRule` interface. It inspects `ast.Node` and reports diagnostics directly.
+3.  Add your rule to the pipeline in `pkg/analyzer/analyzer.go`.
+4.  Add tests.
+
+Pull requests are welcome!
 
 ## License
 

@@ -24,6 +24,6 @@ func (r *LowercaseRule) Apply(text string) (string, []string) {
 
 	runes := []rune(text)
 	runes[0] = unicode.ToLower(runes[0])
-	
+
 	return string(runes), []string{"log message should start with a lowercase letter"}
 }
