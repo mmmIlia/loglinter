@@ -25,5 +25,5 @@ jobs:
       - name: Run GolangCI-Lint (Self-check)
         uses: golangci/golangci-lint-action@v4
         with:
-          version: v1.57.2
+          version: latest
           args: --go=1.22 --verbose
